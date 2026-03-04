@@ -137,9 +137,9 @@ streamlit run app.py
 3. **Upload** your `test_FDxxx.txt` file
 4. Optionally upload `RUL_FDxxx.txt` to compute RMSE/MAE/R²
 5. Predictions appear instantly — explore all tabs
-6. **Download** results as CSV or JSON
 
-> The dashboard also works in **demo mode** (no file upload needed) using synthetic data matching the real model metrics.
+
+
 
 ---
 
@@ -151,7 +151,7 @@ NASA C-MAPSS (Commercial Modular Aero-Propulsion System Simulation)
 - Run-to-failure trajectories
 - RUL capped at 125 cycles
 
-[Download C-MAPSS Dataset](https://data.nasa.gov/dataset/C-MAPSS-Aircraft-Engine-Simulator-Data)
+Dataset Uploded 
 
 ---
 
