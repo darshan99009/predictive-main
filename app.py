@@ -54,14 +54,30 @@ div[data-testid="stFileUploader"] { background:#0d1627; border:2px dashed #1e305
 """, unsafe_allow_html=True)
 
 # ── Plotly base theme ────────────────────────────────────────
-PT = dict(
+AX = dict(gridcolor='#1a2540', linecolor='#1e3050', tickfont=dict(color='#6080a0'))
+PT_BASE = dict(
     paper_bgcolor='#0a0e1a', plot_bgcolor='#0d1220',
     font=dict(color='#8090b0', family='Inter'),
-    xaxis=dict(gridcolor='#1a2540', linecolor='#1e3050', tickfont=dict(color='#6080a0')),
-    yaxis=dict(gridcolor='#1a2540', linecolor='#1e3050', tickfont=dict(color='#6080a0')),
     legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(color='#8090b0')),
     margin=dict(t=50, b=40, l=50, r=20),
 )
+
+def pfig(fig, *, title=None, height=None, xtitle=None, ytitle=None,
+         yrange=None, showlegend=None, barmode=None, **extra):
+    kw = dict(**PT_BASE)
+    kw['xaxis'] = dict(**AX, **(dict(title=xtitle) if xtitle else {}))
+    kw['yaxis'] = dict(**AX, **(dict(title=ytitle) if ytitle else {}),
+                       **(dict(range=yrange) if yrange else {}))
+    if title:      kw['title'] = dict(text=title, font=dict(color='#a0b8d8'))
+    if height:     kw['height'] = height
+    if showlegend is not None: kw['showlegend'] = showlegend
+    if barmode:    kw['barmode'] = barmode
+    kw.update(extra)
+    fig.update_layout(**kw)
+    return fig
+
+def pc(fig): st.plotly_chart(fig, width='stretch')
+
 C = dict(
     lstm='#4da6ff', xgb='#00ff88', hybrid='#ff6b35',
     actual='#a0b8d8', accent='#00d4ff',
@@ -444,7 +460,7 @@ with tab1:
         ))
         fig.update_layout(paper_bgcolor='#0a0e1a',font=dict(color='#8090b0'),
                           height=260,margin=dict(t=50,b=10,l=10,r=10))
-        st.plotly_chart(fig, use_container_width=True)
+        pc(fig)
 
     with cb:
         fig = go.Figure()
@@ -462,11 +478,9 @@ with tab1:
         fig.add_hline(y=20, line_color='#ff4060', line_dash='dot', line_width=1,
                       annotation_text='Critical (20)', annotation_font_size=10,
                       annotation_font_color='#ff4060')
-        fig.update_layout(**PT,
-            title=dict(text=f'Model Predictions — Engine {eng_sel}',font=dict(color='#a0b8d8')),
-            yaxis=dict(**PT['yaxis'],title='Predicted RUL',range=[0,140]),
-            height=260, showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
+        pfig(fig, title=f'Model Predictions — Engine {eng_sel}',
+             ytitle='Predicted RUL', yrange=[0,140], height=260, showlegend=False)
+        pc(fig)
 
 # ────────────────────────────────────────────────────────────
 #  TAB 2 — Model Comparison
@@ -485,9 +499,8 @@ with tab2:
                     marker_color=color,
                     text=[f'{r:.2f}',f'{m:.2f}'],textposition='outside',
                     textfont=dict(color='#a0b8d8')))
-            fig.update_layout(**PT,barmode='group',height=340,
-                title=dict(text='RMSE & MAE',font=dict(color='#a0b8d8')))
-            st.plotly_chart(fig, use_container_width=True)
+            pfig(fig, title='RMSE & MAE', height=340, barmode='group')
+            pc(fig)
 
         with col2:
             r2s = [float(r2_score(true_rul,p)) for p in [pred_lstm,pred_xgb,pred_hybrid]]
@@ -496,10 +509,8 @@ with tab2:
                 marker_color=[C['lstm'],C['xgb'],C['hybrid']],
                 text=[f'{v:.4f}' for v in r2s],textposition='outside',
                 textfont=dict(color='#a0b8d8')))
-            fig.update_layout(**PT,height=340,
-                title=dict(text='R² Score',font=dict(color='#a0b8d8')),
-                yaxis=dict(**PT['yaxis'],range=[0,1.12],title='R²'))
-            st.plotly_chart(fig, use_container_width=True)
+            pfig(fig, title='R² Score', height=340, ytitle='R²', yrange=[0,1.12])
+            pc(fig)
 
         # Scatter plots
         c1,c2,c3 = st.columns(3)
@@ -514,12 +525,10 @@ with tab2:
                     marker=dict(color=color,size=5,opacity=0.6)))
                 fig.add_trace(go.Scatter(x=[0,125],y=[0,125],mode='lines',
                     line=dict(color='#ff4060',dash='dash',width=1.5)))
-                fig.update_layout(**PT,showlegend=False,height=270,
-                    title=dict(text=f'{model} RMSE={rmse_v:.2f}',
-                               font=dict(color='#a0b8d8',size=12)),
-                    xaxis=dict(**PT['xaxis'],title='Actual RUL'),
-                    yaxis=dict(**PT['yaxis'],title='Predicted RUL'))
-                st.plotly_chart(fig, use_container_width=True)
+                pfig(fig, title=f'{model} RMSE={rmse_v:.2f}',
+                     xtitle='Actual RUL', ytitle='Predicted RUL',
+                     height=270, showlegend=False)
+                pc(fig)
 
         # Residuals + sorted curve
         cr1,cr2 = st.columns(2)
@@ -531,9 +540,8 @@ with tab2:
                 fig.add_trace(go.Histogram(x=true_rul-preds,name=model,
                     opacity=0.7,marker_color=color,nbinsx=30))
             fig.add_vline(x=0,line_color='#ff4060',line_dash='dash',line_width=2)
-            fig.update_layout(**PT,barmode='overlay',height=300,
-                title=dict(text='Residual Distributions',font=dict(color='#a0b8d8')))
-            st.plotly_chart(fig, use_container_width=True)
+            pfig(fig, title='Residual Distributions', height=300, barmode='overlay')
+            pc(fig)
         with cr2:
             order = np.argsort(true_rul)
             fig = go.Figure()
@@ -544,11 +552,9 @@ with tab2:
                     ('Hybrid',pred_hybrid,C['hybrid'],'solid')]:
                 fig.add_trace(go.Scatter(x=list(range(len(order))),y=preds[order],
                     mode='lines',name=model,line=dict(color=color,width=1.5,dash=dash)))
-            fig.update_layout(**PT,height=300,
-                title=dict(text='Pred vs Actual (sorted)',font=dict(color='#a0b8d8')),
-                xaxis=dict(**PT['xaxis'],title='Engine index'),
-                yaxis=dict(**PT['yaxis'],title='RUL'))
-            st.plotly_chart(fig, use_container_width=True)
+            pfig(fig, title='Pred vs Actual (sorted)', height=300,
+                 xtitle='Engine index', ytitle='RUL')
+            pc(fig)
 
     else:
         st.info("📎 Upload a **RUL file** alongside the test file to see full model scoring.")
@@ -559,11 +565,9 @@ with tab2:
                                    ('Hybrid',pred_hybrid,C['hybrid'])]:
             fig.add_trace(go.Histogram(x=preds,name=model,opacity=0.7,
                 marker_color=color,nbinsx=30))
-        fig.update_layout(**PT,barmode='overlay',height=380,
-            title=dict(text='Predicted RUL Distribution',font=dict(color='#a0b8d8')),
-            xaxis=dict(**PT['xaxis'],title='Predicted RUL'),
-            yaxis=dict(**PT['yaxis'],title='Count'))
-        st.plotly_chart(fig, use_container_width=True)
+        pfig(fig, title='Predicted RUL Distribution', height=380,
+             barmode='overlay', xtitle='Predicted RUL', ytitle='Count')
+        pc(fig)
 
 # ────────────────────────────────────────────────────────────
 #  TAB 3 — Fleet Heatmap
@@ -590,14 +594,10 @@ with tab3:
         colorbar=dict(title=dict(text='RUL',font=dict(color='#8090b0')),
                       tickfont=dict(color='#8090b0')),
     ))
-    fig.update_layout(**PT,
-        title=dict(text=f'Fleet Health Heatmap — {fd}  ({n} engines)',
-                   font=dict(color='#a0b8d8')),
-        height=max(250, nrows*45+100),
-        xaxis=dict(**PT['xaxis'],title='Engine slot'),
-        yaxis=dict(**PT['yaxis'],title='Row'),
-    )
-    st.plotly_chart(fig, use_container_width=True)
+    pfig(fig, title=f'Fleet Health Heatmap — {fd}  ({n} engines)',
+         height=max(250, nrows*45+100),
+         xtitle='Engine slot', ytitle='Row')
+    pc(fig)
 
     # Summary donut
     col_d, col_s = st.columns([1,2])
@@ -619,7 +619,7 @@ with tab3:
                               font_size=16,showarrow=False,
                               font=dict(color='#00d4ff'))],
         )
-        st.plotly_chart(fig, use_container_width=True)
+        pc(fig)
 
     with col_s:
         st.markdown("### Fleet Summary")
@@ -662,7 +662,7 @@ with tab4:
 
     df_show = df_out[df_out['Status'].isin(status_f)].sort_values(sort_col)
     st.markdown(f"Showing **{len(df_show)}** / **{len(df_out)}** engines")
-    st.dataframe(df_show, use_container_width=True, height=480)
+    st.dataframe(df_show, width='stretch', height=480)
 
 # ────────────────────────────────────────────────────────────
 #  TAB 5 — Download
