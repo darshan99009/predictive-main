@@ -648,8 +648,7 @@ with tab4:
     })
     if true_rul is not None and len(true_rul)==len(engine_ids):
         df_out.insert(1,'True RUL', np.round(true_rul,2))
-        df_out['Error']    = np.round(pred_hybrid - true_rul, 2)
-        df_out['Abs Error']= np.round(np.abs(pred_hybrid - true_rul), 2)
+
 
     col_f1, col_f2, col_f3 = st.columns([1,1,2])
     with col_f1:
