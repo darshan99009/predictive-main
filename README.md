@@ -8,7 +8,7 @@ NASA C-MAPSS · FD001 / FD002 / FD003 / FD004
 ---
 
 ## 🚀 Live App
-👉 **[predictive-main.streamlit.app](https://predictive-main.streamlit.app)**
+👉 **[predictive-main.streamlit.app]([https://predictive-main.streamlit.app](https://predictive-main-6zqfnrdbtguflkfgf3vym3.streamlit.app/))**
 
 ---
 
