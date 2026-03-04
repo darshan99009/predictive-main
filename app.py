@@ -436,9 +436,6 @@ with tab1:
     with c3: st.metric("LSTM RUL",    f"{rul_l:.1f}", f"{rul_l-rul_h:+.1f} vs Hybrid")
     with c4:
         st.metric("XGBoost RUL", f"{rul_x:.1f}", f"{rul_x-rul_h:+.1f} vs Hybrid")
-        if true_rul is not None and idx < len(true_rul):
-            st.metric("True RUL", f"{float(true_rul[idx]):.1f}",
-                      f"Error {rul_h-float(true_rul[idx]):+.1f}")
 
     st.markdown("")
     cg, cb = st.columns([1,2])
@@ -472,11 +469,6 @@ with tab1:
             text=[f'{v:.1f}' for v in [rul_l,rul_x,rul_h]],
             textposition='outside', textfont=dict(color='#a0b8d8',size=13),
         ))
-        if true_rul is not None and idx < len(true_rul):
-            fig.add_hline(y=float(true_rul[idx]), line_color='#ff4060',
-                          line_dash='dash', line_width=2,
-                          annotation_text=f'True RUL={float(true_rul[idx]):.0f}',
-                          annotation_font_color='#ff4060')
         fig.add_hline(y=20, line_color='#ff4060', line_dash='dot', line_width=1,
                       annotation_text='Critical (20)', annotation_font_size=10,
                       annotation_font_color='#ff4060')
