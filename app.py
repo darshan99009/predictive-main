@@ -312,7 +312,7 @@ with st.sidebar:
     `alpha_FDxxx.npy`
 
     **Repo:**
-    [github.com/darshan99009/predictive-main](https://github.com/darshan99009/predictive-main)
+    [IST 27 Capstone Project](https://github.com/darshan99009/IST_27-Capstone_Project)
     """)
 
 # ════════════════════════════════════════════════════════════
@@ -397,12 +397,11 @@ st.markdown("")
 # ════════════════════════════════════════════════════════════
 #   TABS
 # ════════════════════════════════════════════════════════════
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4 = st.tabs([
     "🔍  Engine Inspector",
     "📊  Model Comparison",
     "🗺️  Fleet Heatmap",
     "📋  Predictions Table",
-    "⬇️  Download",
 ])
 
 # ────────────────────────────────────────────────────────────
@@ -664,78 +663,12 @@ with tab4:
     st.markdown(f"Showing **{len(df_show)}** / **{len(df_out)}** engines")
     st.dataframe(df_show, width='stretch', height=480)
 
-# ────────────────────────────────────────────────────────────
-#  TAB 5 — Download
-# ────────────────────────────────────────────────────────────
-with tab5:
-    st.markdown("### ⬇️ Export Predictions")
-
-    df_export = pd.DataFrame({
-        'engine_id':    engine_ids,
-        'pred_hybrid':  np.round(pred_hybrid, 4),
-        'pred_lstm':    np.round(pred_lstm,   4),
-        'pred_xgb':     np.round(pred_xgb,    4),
-        'status':       [rul_status(v)[0].split()[-1] for v in pred_hybrid],
-    })
-    if true_rul is not None and len(true_rul)==len(engine_ids):
-        df_export['true_rul']     = np.round(true_rul, 4)
-        df_export['error_hybrid'] = np.round(pred_hybrid - true_rul, 4)
-
-    col_d1, col_d2 = st.columns(2)
-    with col_d1:
-        st.download_button(
-            "📥 Download CSV",
-            data=df_export.to_csv(index=False),
-            file_name=f'rul_predictions_{fd}.csv',
-            mime='text/csv',
-        )
-    with col_d2:
-        # JSON
-        import json
-        st.download_button(
-            "📥 Download JSON",
-            data=json.dumps(df_export.to_dict(orient='records'), indent=2),
-            file_name=f'rul_predictions_{fd}.json',
-            mime='application/json',
-        )
-
-    st.markdown("---")
-    st.markdown("### Summary Report")
-    col_s1, col_s2 = st.columns(2)
-    with col_s1:
-        alpha_val = models_dict['alpha'] if not DEMO else 'N/A (demo)'
-        st.markdown(f"""
-        **Dataset:** {fd} — {DATASET_CFG[fd]['label']}
-        **Total engines:** {len(engine_ids)}
-        **Critical (RUL < 20):** {critical} ({100*critical/len(engine_ids):.1f}%)
-        **Warning  (RUL 20–50):** {warning} ({100*warning/len(engine_ids):.1f}%)
-        **Healthy  (RUL > 50):** {healthy} ({100*healthy/len(engine_ids):.1f}%)
-        **Average Hybrid RUL:** {np.mean(pred_hybrid):.1f} cycles
-        **Min / Max RUL:** {np.min(pred_hybrid):.1f} / {np.max(pred_hybrid):.1f}
-        **Ensemble α:** {alpha_val}
-        """)
-    with col_s2:
-        if metrics['Hybrid']:
-            st.markdown(f"""
-            **Hybrid RMSE:** {metrics['Hybrid']['RMSE']:.4f}
-            **Hybrid MAE:**  {metrics['Hybrid']['MAE']:.4f}
-            **Hybrid R²:**   {metrics['Hybrid']['R2']:.4f}
-            ——
-            **LSTM   RMSE:** {metrics['LSTM']['RMSE']:.4f}
-            **LSTM   R²:**   {metrics['LSTM']['R2']:.4f}
-            ——
-            **XGBoost RMSE:**{metrics['XGBoost']['RMSE']:.4f}
-            **XGBoost R²:**  {metrics['XGBoost']['R2']:.4f}
-            """)
-        else:
-            st.info("Upload RUL file to compute RMSE / MAE / R².")
-
 # ── Footer ────────────────────────────────────────────────────
 st.markdown("---")
 st.markdown("""
 <div style='text-align:center;color:#2a4060;font-size:0.8rem;padding:8px'>
     ⚙️ Hybrid XGBoost–LSTM &nbsp;|&nbsp; NASA C-MAPSS &nbsp;|&nbsp;
-    <a href='https://github.com/darshan99009/predictive-main'
+    <a href='https://github.com/darshan99009/IST_27-Capstone_Project'
        style='color:#3a6090;text-decoration:none'>GitHub</a>
     &nbsp;|&nbsp; Streamlit Cloud
 </div>
